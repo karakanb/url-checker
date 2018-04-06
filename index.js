@@ -5,12 +5,16 @@ const util = require('util');
 const validUrl = require('valid-url');
 
 module.exports = (req, res) => {
+
+  // Parse the url.
   const url_parts = url.parse(req.url, true);
   const query = url_parts.query;
 
+  // Set the request header and validate in case of invalid inputs.
   res.setHeader('Content-Type', 'application/json');
-  requestValidation(query, res);
+  validateRequest(query, res);
 
+  // Get the status and return the response.
   getStatus(query.url, (response) => {
     const statusReport = {
       success: true,
@@ -25,30 +29,53 @@ module.exports = (req, res) => {
   });
 }
 
-const requestValidation = (query, res) => {
+/**
+ * Validate the request by checking the key existance, URI and protocol checks.
+ * @param {Object} query query instance that is extracted from the request. 
+ * @param {Object} res Node response object.
+ */
+const validateRequest = (query, res) => {
   if (!query.url) {
-    res.end(JSON.stringify({
-      success: false,
-      message: "No url key provided with the request."
-    }));
+    res.end(failure("No url key provided with the request."));
   }
 
   if (!validUrl.isUri(query.url)) {
-    res.end(JSON.stringify({
-      success: false,
-      message: "Given URL seems to be not a valid URI."
-    }));
+    res.end(failure("Given URL seems to be not a valid URI."));
   }
 
   if (!validUrl.isHttpUri(query.url) && !validUrl.isHttpsUri(query.url)) {
-    res.end(JSON.stringify({
-      success: false,
-      message: "Given URL seems to be not a valid HTTP or HTTPS url."
-    }));
+    res.end(failure("Given URL seems to be not a valid HTTP or HTTPS url."));
   }
 }
 
+/**
+ * Perform an HTTP GET call to the given URL, with appropriate protocol.
+ * @param {string} url
+ * @param {function} callback
+ */
 const getStatus = (url, callback) => {
   const callbackCaller = (res) => { callback(res) };
   validUrl.isHttpUri(url) ? http.get(url, callbackCaller) : https.get(url, callbackCaller);
+}
+
+/**
+ * Return a JSON string with success message.
+ * @param {string} message 
+ */
+const success = (message) => {
+  return JSON.stringify({
+    success: true,
+    message: message
+  });
+}
+
+/**
+ * Return a JSON string with failure message.
+ * @param {string} message 
+ */
+const failure = (message) => {
+  return JSON.stringify({
+    success: false,
+    message: message
+  });
 }
