@@ -1,5 +1,5 @@
 {
-  "name": "nowtest",
+  "name": "url-checker",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -18,5 +18,8 @@
   "license": "ISC",
   "devDependencies": {
     "micro-dev": "^2.2.2"
+  },
+  "now": {
+    "alias": "url-checker"
   }
 }
