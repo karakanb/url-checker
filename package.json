@@ -1,0 +1,21 @@
+{
+  "name": "nowtest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "micro",
+    "dev": "micro-dev"
+  },
+  "dependencies": {
+    "micro": "latest"
+  },
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "micro-dev": "^2.2.2"
+  }
+}
