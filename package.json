@@ -8,7 +8,8 @@
     "dev": "micro-dev"
   },
   "dependencies": {
-    "micro": "latest"
+    "micro": "latest",
+    "valid-url": "^1.0.9"
   },
   "env": {
     "NODE_ENV": "production"
