@@ -6,8 +6,17 @@ module.exports = (req, res) => {
   const url_parts = url.parse(req.url, true);
   const query = url_parts.query;
 
+  res.setHeader('Content-Type', 'application/json');
+  if (!query["url"]) {
+    res.end(JSON.stringify({
+      success: false,
+      message: "No url key provided with the request."
+    }));
+  }
+
   getStatus(query.url, (response) => {
     const statusReport = {
+      success: true,
       statusCode: response.statusCode,
       statusMessage: response.statusMessage,
       headers: response.headers,
@@ -15,7 +24,6 @@ module.exports = (req, res) => {
       actualUrl: query.url,
     }
 
-    res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(statusReport));
   });
 }
