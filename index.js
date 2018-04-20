@@ -12,7 +12,10 @@ module.exports = (req, res) => {
 
   // Set the request header and validate in case of invalid inputs.
   res.setHeader('Content-Type', 'application/json');
-  validateRequest(query, res);
+  const isValidRequest = validateRequest(query, res);
+  if (!isValidRequest) {
+    return;
+  }
 
   // Get the status and return the response.
   getStatus(query.url, (response) => {
@@ -26,6 +29,8 @@ module.exports = (req, res) => {
     }
 
     res.end(JSON.stringify(statusReport));
+  }, (err) => {
+    res.end(failure(err));
   });
 }
 
@@ -35,17 +40,22 @@ module.exports = (req, res) => {
  * @param {Object} res Node response object.
  */
 const validateRequest = (query, res) => {
-  if (!query.url) {
+  if (!query || !query.url) {
     res.end(failure("No url key provided with the request."));
+    return false;
   }
 
   if (!validUrl.isUri(query.url)) {
     res.end(failure("Given URL seems to be not a valid URI."));
+    return false;
   }
 
   if (!validUrl.isHttpUri(query.url) && !validUrl.isHttpsUri(query.url)) {
     res.end(failure("Given URL seems to be not a valid HTTP or HTTPS url."));
+    return false;
   }
+
+  return true;
 }
 
 /**
@@ -53,9 +63,10 @@ const validateRequest = (query, res) => {
  * @param {string} url
  * @param {function} callback
  */
-const getStatus = (url, callback) => {
+const getStatus = (url, callback, errorCallback) => {
   const callbackCaller = (res) => { callback(res) };
-  validUrl.isHttpUri(url) ? http.get(url, callbackCaller) : https.get(url, callbackCaller);
+  const req = validUrl.isHttpUri(url) ? http.get(url, callbackCaller) : https.get(url, callbackCaller);
+  req.on('error', errorCallback);
 }
 
 /**
